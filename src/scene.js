@@ -6,6 +6,7 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import mask from './imgs/mask.png'
 import afrika from './imgs/afrika.jpg'
 import afrika2 from './imgs/dany.jpg'
+import gsap from 'gsap';
 
 
 let renderer;
@@ -19,12 +20,13 @@ let mouse = new THREE.Vector2();
 let point = new THREE.Vector2();
 let material;
 let move=0;
+let textures
 camera.position.z = 1000;
 
 
 const addMesh = () => {
 
-    let textures = [
+    textures = [
         new THREE.TextureLoader().load(afrika),
         new THREE.TextureLoader().load(afrika2),
         new THREE.TextureLoader().load(mask)
@@ -38,6 +40,7 @@ const addMesh = () => {
             text2:{type:'t',value:textures[1]},
             move:{type:'f',value:0},
             mouse:{type:'v2',value:null},
+            mousePressed:{type:'f',value:0},
             time:{type:'f',value:0}
         },
         side: THREE.DoubleSide,
@@ -87,10 +90,25 @@ const mouseEffects = () => {
         new THREE.MeshBasicMaterial()
     )
     window.addEventListener('mousewheel',(e)=>{
-        console.log(e.wheelDeltaY/1000)
-        move += e.wheelDeltaY/1000;
+        // console.log(e.wheelDeltaY/1000)
+        move += e.wheelDeltaY/4000;
     })
-    
+
+    window.addEventListener('mousedown',(e)=>{
+        gsap.to(material.uniforms.mousePressed,{
+            duration:1,
+            value:1,
+            ease:"elastic.out(1,0.3)"
+        })
+    })
+    window.addEventListener('mouseup',(e)=>{
+        gsap.to(material.uniforms.mousePressed,{
+            duration:1,
+            value:0,
+            ease:"elastic.out(1,0.3)"
+        })
+    })
+
     window.addEventListener('mousemove',(e)=>{
         mouse.x = (e.clientX/window.innerWidth)*2-1;
         mouse.y = -(e.clientY/window.innerHeight)*2+1;
@@ -99,7 +117,7 @@ const mouseEffects = () => {
         let intersect = raycaster.intersectObjects([test]);
         point.x = intersect[0].point.x;
         point.y = intersect[0].point.y;
-        console.log(intersect[0].point);
+        // console.log(intersect[0].point);
     }, false);
 
 }
@@ -108,9 +126,13 @@ const mouseEffects = () => {
 const animate = () => {
 
     time ++;
+    let next = Math.floor(move+ 40)%2;
+    let prev = (Math.floor(move+ 40)+1)%2;
     material.uniforms.time.value = time;
     material.uniforms.move.value = move;
     material.uniforms.mouse.value = point;
+    material.uniforms.text1.value = textures[next]
+    material.uniforms.text2.value = textures[prev]
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 };

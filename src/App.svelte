@@ -11,7 +11,7 @@
 	<canvas bind:this={el}></canvas>
 </div>
 <p>
-	willame {rand}
+	😋 Oh This is  Afrika! 😋
 </p>
 
 <style>
